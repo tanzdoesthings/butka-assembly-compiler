@@ -47,7 +47,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         let instruction = line.get(0).unwrap();
         if instruction == "NOP" {
             bin[i as usize] = 0x0000;
-        } else if instruction == "ADD" {
+        } else if instruction == "ADD" || instruction == "add" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -95,7 +95,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0001 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "LDI" {
+        } else if instruction == "LDI" || instruction == "ldi" {
             let mut regA: u16 = 0;
             let mut immediate: u16 = line.get(2).unwrap().parse().unwrap();
             immediate = immediate & 0x00FF;
@@ -123,7 +123,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0002 << 12) | (regA << 8) | immediate;
-        } else if instruction == "SUB" {
+        } else if instruction == "SUB" || instruction == "sub" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -171,7 +171,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0003 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "INV" {
+        } else if instruction == "INV" || instruction == "inv" {
             let mut regA: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
                 "R0" => regA = 0,
@@ -196,7 +196,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0004 << 12) | (regA << 8);
-        } else if instruction == "AND" {
+        } else if instruction == "AND" || instruction == "and" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -244,7 +244,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0005 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "OR" {
+        } else if instruction == "OR" || instruction == "or" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -292,7 +292,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0006 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "XOR" {
+        } else if instruction == "XOR" || instruction == "xor" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -340,7 +340,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0007 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "MOV" {
+        } else if instruction == "MOV" || instruction == "mov" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -388,7 +388,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0008 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "SR" {
+        } else if instruction == "SR" || instruction == "sr" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -436,7 +436,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x0009 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "SL" {
+        } else if instruction == "SL" || instruction == "sl" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
@@ -484,7 +484,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 }
             }
             bin[i as usize] = (0x000A << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "IN" {
+        } else if instruction == "IN" || instruction == "in" {
             let mut regA: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
                 "R0" => regA = 0,
@@ -511,7 +511,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
             let mut immediate: u16 = line.get(2).unwrap().parse().unwrap();
             immediate = immediate & 0x00FF;
             bin[i as usize] = (0x000B << 12) | (regA << 8) | immediate;
-        } else if instruction == "OUT" {
+        } else if instruction == "OUT" || instruction == "out" {
             let mut regA: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
                 "R0" => regA = 0,
@@ -538,7 +538,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
             let mut immediate: u16 = line.get(2).unwrap().parse().unwrap();
             immediate = immediate & 0x00FF;
             bin[i as usize] = (0x000C << 12) | (regA << 8) | immediate;
-        } else if instruction == "JZ" {
+        } else if instruction == "JZ" || instruction == "jz" {
             let mut regA: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
                 "R0" => regA = 0,
@@ -564,7 +564,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
             }
             let label = labels.get(line.get(2).unwrap()).unwrap();
             bin[i as usize] = (0x000D << 12) | (regA << 8) | label;
-        } else if instruction == "JLT" {
+        } else if instruction == "JLT" || instruction == "jlt" {
             let mut regA: u16 = 0;
             match line.get(1).unwrap().as_str().to_uppercase().deref() {
                 "R0" => regA = 0,
@@ -590,7 +590,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
             }
             let label = labels.get(line.get(2).unwrap()).unwrap();
             bin[i as usize] = (0x000E << 12) | (regA << 8) | label;
-        } else if instruction == "J" {
+        } else if instruction == "J" || instruction == "j" {
             let label = labels.get(line.get(1).unwrap()).unwrap();
             println!("{}", label);
             bin[i as usize] = (0x000F << 12) | label;
