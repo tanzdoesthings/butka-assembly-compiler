@@ -25,7 +25,6 @@ fn writeBinary(bin: [u16; 32]) {
         binArray[i + 1] = byt.to_be_bytes()[1];
         i += 2;
     }
-    println!("{:?}", binArray);
     file.unwrap().write_all(&binArray.as_slice());
 }
 fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
@@ -45,7 +44,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
     }
     for line in buf.iter() {
         let instruction = line.get(0).unwrap();
-        if instruction == "NOP" {
+        if instruction == "NOP" || instruction == "nop" {
             bin[i as usize] = 0x0000;
         } else if instruction == "ADD" || instruction == "add" {
             let mut regA: u16 = 0;
@@ -68,7 +67,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
                 "R14" => regA = 14,
                 "R15" => regA = 15,
                 _ => {
-                    println!("Not valid");
+                    println!("Invalid input");
                     process::exit(0x02);
                 }
             }
@@ -592,7 +591,6 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
             bin[i as usize] = (0x000E << 12) | (regA << 8) | label;
         } else if instruction == "J" || instruction == "j" {
             let label = labels.get(line.get(1).unwrap()).unwrap();
-            println!("{}", label);
             bin[i as usize] = (0x000F << 12) | label;
         } else {
             if instruction.chars().last().unwrap() != ':' {
