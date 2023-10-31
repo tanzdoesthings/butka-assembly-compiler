@@ -39,7 +39,9 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         if instruction.chars().last().unwrap() == ':' {
             let chopped = &instruction[0..instruction.len() - 1].to_string();
             labels.insert(chopped.clone(), j);
+            j -= 1;
         }
+        j += 1;
     }
     for line in buf.iter() {
         let instruction = line.get(0).unwrap();
@@ -590,6 +592,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
             bin[i as usize] = (0x000E << 12) | (regA << 8) | label;
         } else if instruction == "J" {
             let label = labels.get(line.get(1).unwrap()).unwrap();
+            println!("{}", label);
             bin[i as usize] = (0x000F << 12) | label;
         } else {
             if instruction.chars().last().unwrap() != ':' {
