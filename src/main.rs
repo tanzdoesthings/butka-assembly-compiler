@@ -5,6 +5,7 @@ use std::io::prelude::*;
 use std::ops::Deref;
 use std::process;
 
+// Main function
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() <= 1 {
@@ -16,6 +17,8 @@ fn main() {
     let binary = compile(processedContents);
     writeBinary(binary);
 }
+
+// Output file
 fn writeBinary(bin: [u16; 32]) {
     let mut file = fs::File::create("out.busm");
     let mut binArray: [u8; 64] = [0; 64];
@@ -27,6 +30,8 @@ fn writeBinary(bin: [u16; 32]) {
     }
     file.unwrap().write_all(&binArray.as_slice());
 }
+
+// Compile files
 fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
     let mut bin: [u16; 32] = [0; 32];
     let mut labels: HashMap<String, u16> = HashMap::new();
@@ -36,560 +41,175 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         let instruction = line.get(0).unwrap();
 
         if instruction.chars().last().unwrap() == ':' {
-            let chopped = &instruction[0..instruction.len() - 1].to_string();
+            let chopped = &instruction[0..instruction.len() - 1].to_string(); // Out of bounds on zero error
             labels.insert(chopped.clone(), j);
             j -= 1;
         }
         j += 1;
     }
+
+    // Main instruction parser
     for line in buf.iter() {
+        // Get lines
         let instruction = line.get(0).unwrap();
+        
+        // INSTRUCTION: NOP
         if instruction == "NOP" || instruction == "nop" {
             bin[i as usize] = 0x0000;
-        } else if instruction == "ADD" || instruction == "add" {
+        } 
+
+        // INSTRUCTION: ADD
+        else if instruction == "ADD" || instruction == "add" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Invalid input");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+            
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+            
             bin[i as usize] = (0x0001 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "LDI" || instruction == "ldi" {
+        } 
+
+        // INSTRUCTION: LDI
+        else if instruction == "LDI" || instruction == "ldi" {
             let mut regA: u16 = 0;
             let mut immediate: u16 = line.get(2).unwrap().parse().unwrap();
             immediate = immediate & 0x00FF;
 
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+            setRegister(line.get(1).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0002 << 12) | (regA << 8) | immediate;
-        } else if instruction == "SUB" || instruction == "sub" {
+        } 
+        
+        // INSTRUCTION: SUB
+        else if instruction == "SUB" || instruction == "sub" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0003 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "INV" || instruction == "inv" {
+        } 
+
+        // INSTRUCTION: INV
+        else if instruction == "INV" || instruction == "inv" {
             let mut regA: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0004 << 12) | (regA << 8);
-        } else if instruction == "AND" || instruction == "and" {
+        } 
+        
+        // INSTRUCTION: AND
+        else if instruction == "AND" || instruction == "and" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0005 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "OR" || instruction == "or" {
+        } 
+        
+        // INSTRUCTION: OR
+        else if instruction == "OR" || instruction == "or" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0006 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "XOR" || instruction == "xor" {
+        } 
+        
+        // INSTRUCTION: XOR
+        else if instruction == "XOR" || instruction == "xor" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0007 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "MOV" || instruction == "mov" {
+        } 
+        
+        // INSTRUCTION: MOV
+        else if instruction == "MOV" || instruction == "mov" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0008 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "SR" || instruction == "sr" {
+        } 
+        
+        // INSTRUCTION: SR
+        else if instruction == "SR" || instruction == "sr" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+
             bin[i as usize] = (0x0009 << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "SL" || instruction == "sl" {
+        } 
+        
+        // INSTRUCTION: SL
+        else if instruction == "SL" || instruction == "sl" {
             let mut regA: u16 = 0;
             let mut regB: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
-            match line.get(2).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regB = 0,
-                "R1" => regB = 1,
-                "R2" => regB = 2,
-                "R3" => regB = 3,
-                "R4" => regB = 4,
-                "R5" => regB = 5,
-                "R6" => regB = 6,
-                "R7" => regB = 7,
-                "R8" => regB = 8,
-                "R9" => regB = 9,
-                "R10" => regB = 10,
-                "R11" => regB = 11,
-                "R12" => regB = 12,
-                "R13" => regB = 13,
-                "R14" => regB = 14,
-                "R15" => regB = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            setRegister(line.get(2).unwrap().to_uppercase());
+            
             bin[i as usize] = (0x000A << 12) | (regA << 8) | (regB << 4);
-        } else if instruction == "IN" || instruction == "in" {
+        } 
+        
+        // INSTRUCTION: IN
+        else if instruction == "IN" || instruction == "in" {
             let mut regA: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            
             let mut immediate: u16 = line.get(2).unwrap().parse().unwrap();
             immediate = immediate & 0x00FF;
-            bin[i as usize] = (0x000B << 12) | (regA << 8) | immediate;
-        } else if instruction == "OUT" || instruction == "out" {
+            bin[i as usize] = (0x000B << 12) | (regA << 8) | (immediate << 4);
+        } 
+        
+        // INSTRUCTION: OUT
+        else if instruction == "OUT" || instruction == "out" {
             let mut regA: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+            
             let mut immediate: u16 = line.get(2).unwrap().parse().unwrap();
             immediate = immediate & 0x00FF;
             bin[i as usize] = (0x000C << 12) | (regA << 8) | immediate;
-        } else if instruction == "JZ" || instruction == "jz" {
+        } 
+        
+        // INSTRUCTION: JZ
+        else if instruction == "JZ" || instruction == "jz" {
             let mut regA: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
+
+            setRegister(line.get(1).unwrap().to_uppercase());
+
             let label = labels.get(line.get(2).unwrap()).unwrap();
             bin[i as usize] = (0x000D << 12) | (regA << 8) | label;
-        } else if instruction == "JLT" || instruction == "jlt" {
+        } 
+        
+        // INSTRUCTION: JLT
+        else if instruction == "JLT" || instruction == "jlt" {
             let mut regA: u16 = 0;
-            match line.get(1).unwrap().as_str().to_uppercase().deref() {
-                "R0" => regA = 0,
-                "R1" => regA = 1,
-                "R2" => regA = 2,
-                "R3" => regA = 3,
-                "R4" => regA = 4,
-                "R5" => regA = 5,
-                "R6" => regA = 6,
-                "R7" => regA = 7,
-                "R8" => regA = 8,
-                "R9" => regA = 9,
-                "R10" => regA = 10,
-                "R11" => regA = 11,
-                "R12" => regA = 12,
-                "R13" => regA = 13,
-                "R14" => regA = 14,
-                "R15" => regA = 15,
-                _ => {
-                    println!("Not valid");
-                    process::exit(0x02);
-                }
-            }
             let label = labels.get(line.get(2).unwrap()).unwrap();
+            
+            setRegister(line.get(1).unwrap().to_uppercase());
+
             bin[i as usize] = (0x000E << 12) | (regA << 8) | label;
-        } else if instruction == "J" || instruction == "j" {
+        } 
+        
+        // INSTRUCTION: J
+        else if instruction == "J" || instruction == "j" {
             let label = labels.get(line.get(1).unwrap()).unwrap();
             bin[i as usize] = (0x000F << 12) | label;
         } else {
@@ -605,6 +225,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
     bin
 }
 
+// File I/O
 fn processFile(buf: String) -> Vec<Vec<String>> {
     let mut retValue: Vec<Vec<String>> = Vec::new();
 
@@ -619,7 +240,39 @@ fn processFile(buf: String) -> Vec<Vec<String>> {
     retValue
 }
 
+// Get file contents
 fn getContents(args: Vec<String>) -> String {
     let contents = fs::read_to_string(args.get(1).unwrap()).expect("could not open file");
     contents
+}
+
+// Retruns register based on string
+fn setRegister(buf: String) -> u8 {
+    let regA: u8;
+    let strBuff = buf.as_str();
+
+    match strBuff {
+        "R0" => regA = 0,
+        "R1" => regA = 1,
+        "R2" => regA = 2,
+        "R3" => regA = 3,
+        "R4" => regA = 4,
+        "R5" => regA = 5,
+        "R6" => regA = 6,
+        "R7" => regA = 7,
+        "R8" => regA = 8,
+        "R9" => regA = 9,
+        "R10" => regA = 10,
+        "R11" => regA = 11,
+        "R12" => regA = 12,
+        "R13" => regA = 13,
+        "R14" => regA = 14,
+        "R15" => regA = 15,
+        _ => {
+            println!("Not valid");
+            process::exit(0x02);
+        }
+    }
+
+    regA
 }
