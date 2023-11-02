@@ -1,15 +1,16 @@
+#![allow(non_snake_case)] // haha got rid of the dumb warning
 use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::io::prelude::*;
-use std::ops::Deref;
+// use std::ops::Deref;
 use std::process;
 
 // Main function
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() <= 1 {
-        println!("argument expected please give argument.");
+        println!("Argument expected in file. Please give argument.");
         process::exit(0x0100);
     }
     let contents = getContents(args);
@@ -20,7 +21,7 @@ fn main() {
 
 // Output file
 fn writeBinary(bin: [u16; 32]) {
-    let mut file = fs::File::create("out.busm");
+    let file = fs::File::create("out.bin");
     let mut binArray: [u8; 64] = [0; 64];
     let mut i = 0;
     for byt in bin.iter() {
@@ -33,6 +34,9 @@ fn writeBinary(bin: [u16; 32]) {
 
 // Compile files
 fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
+    let mut regA: u16;
+    let mut regB: u16;
+
     let mut bin: [u16; 32] = [0; 32];
     let mut labels: HashMap<String, u16> = HashMap::new();
     let mut i: u16 = 0;
@@ -60,8 +64,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
 
         // INSTRUCTION: ADD
         else if instruction == "ADD" || instruction == "add" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
             
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -71,7 +75,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
 
         // INSTRUCTION: LDI
         else if instruction == "LDI" || instruction == "ldi" {
-            let mut regA: u16 = 0;
+            regA = 0;
+            
             let mut immediate: u16 = line.get(2).unwrap().parse().unwrap();
             immediate = immediate & 0x00FF;
 
@@ -82,8 +87,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: SUB
         else if instruction == "SUB" || instruction == "sub" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -93,7 +98,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
 
         // INSTRUCTION: INV
         else if instruction == "INV" || instruction == "inv" {
-            let mut regA: u16 = 0;
+            regA = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
 
@@ -102,8 +107,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: AND
         else if instruction == "AND" || instruction == "and" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -113,8 +118,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: OR
         else if instruction == "OR" || instruction == "or" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -124,8 +129,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: XOR
         else if instruction == "XOR" || instruction == "xor" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -135,8 +140,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: MOV
         else if instruction == "MOV" || instruction == "mov" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -146,8 +151,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: SR
         else if instruction == "SR" || instruction == "sr" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -157,8 +162,8 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: SL
         else if instruction == "SL" || instruction == "sl" {
-            let mut regA: u16 = 0;
-            let mut regB: u16 = 0;
+            regA = 0;
+            regB = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             setRegister(line.get(2).unwrap().to_uppercase());
@@ -168,7 +173,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: IN
         else if instruction == "IN" || instruction == "in" {
-            let mut regA: u16 = 0;
+            regA = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             
@@ -179,7 +184,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: OUT
         else if instruction == "OUT" || instruction == "out" {
-            let mut regA: u16 = 0;
+            regA = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
             
@@ -190,7 +195,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: JZ
         else if instruction == "JZ" || instruction == "jz" {
-            let mut regA: u16 = 0;
+            regA = 0;
 
             setRegister(line.get(1).unwrap().to_uppercase());
 
@@ -200,7 +205,7 @@ fn compile(buf: Vec<Vec<String>>) -> [u16; 32] {
         
         // INSTRUCTION: JLT
         else if instruction == "JLT" || instruction == "jlt" {
-            let mut regA: u16 = 0;
+            regA = 0;
             let label = labels.get(line.get(2).unwrap()).unwrap();
             
             setRegister(line.get(1).unwrap().to_uppercase());
